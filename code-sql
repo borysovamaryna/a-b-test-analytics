@@ -1,0 +1,159 @@
+with general_info as (
+  select
+  sp.ga_session_id,
+  s.date,
+  sp.country,
+  sp.device,
+  sp.continent,
+  sp.channel,
+  abt.test,
+  abt.test_group
+  from `DA.session` s
+  join `DA.session_params` sp
+  on s.ga_session_id = sp.ga_session_id
+  join `DA.ab_test` abt
+  on sp.ga_session_id = abt.ga_session_id
+
+
+),
+
+
+session_with_orders as (
+  select
+  general_info.date,
+  general_info.country,
+  general_info.device,
+  general_info.continent,
+  general_info.channel,
+  general_info.test,
+  general_info.test_group,
+  count(distinct o.ga_session_id) as session_with_order
+  from general_info
+  join `DA.order` o
+  on general_info.ga_session_id = o.ga_session_id
+  group by
+  general_info.date,
+  general_info.country,
+  general_info.device,
+  general_info.continent,
+  general_info.channel,
+  general_info.test,
+  general_info.test_group
+),
+
+
+events as(
+  select
+  general_info.date,
+  general_info.country,
+  general_info.device,
+  general_info.continent,
+  general_info.channel,
+  general_info.test,
+  general_info.test_group,
+  ep.event_name,
+  count(ep.ga_session_id) as events_cnt
+  from general_info
+  join `DA.event_params` ep
+  on general_info.ga_session_id = ep.ga_session_id
+  group by
+  general_info.date,
+  general_info.country,
+  general_info.device,
+  general_info.continent,
+  general_info.channel,
+  general_info.test,
+  general_info.test_group,
+  ep.event_name
+),
+
+
+sessions as(
+  select
+  general_info.date,
+  general_info.country,
+  general_info.device,
+  general_info.continent,
+  general_info.channel,
+  general_info.test,
+  general_info.test_group,
+  count(distinct general_info.ga_session_id) as session_cnt
+  from general_info
+  group by
+  general_info.date,
+  general_info.country,
+  general_info.device,
+  general_info.continent,
+  general_info.channel,
+  general_info.test,
+  general_info.test_group
+),
+new_account as(
+  select
+  general_info.date,
+  general_info.country,
+  general_info.device,
+  general_info.continent,
+  general_info.channel,
+  general_info.test,
+  general_info.test_group,
+  count(distinct acs.ga_session_id) as new_account_cnt
+  from general_info
+  join `DA.account_session` acs
+  on acs.ga_session_id = general_info.ga_session_id
+  group by
+  general_info.date,
+  general_info.country,
+  general_info.device,
+  general_info.continent,
+  general_info.channel,
+  general_info.test,
+  general_info.test_group
+)
+select
+session_with_orders.date,
+  session_with_orders.country,
+  session_with_orders.device,
+  session_with_orders.continent,
+  session_with_orders.channel,
+  session_with_orders.test,
+  session_with_orders.test_group,
+  'session with orders' as event_name,
+  session_with_orders.session_with_order as value
+from session_with_orders
+union all
+select
+  events.date,
+  events.country,
+  events.device,
+  events.continent,
+  events.channel,
+  events.test,
+  events.test_group,
+  events.event_name,
+  events.events_cnt as value
+from events
+union all
+select
+  sessions.date,
+  sessions.country,
+  sessions.device,
+  sessions.continent,
+  sessions.channel,
+  sessions.test,
+  sessions.test_group,
+  'session' as event_name,
+  sessions.session_cnt as value
+from sessions
+union all
+select
+  new_account.date,
+  new_account.country,
+  new_account.device,
+  new_account.continent,
+  new_account.channel,
+  new_account.test,
+  new_account.test_group,
+  'new account' as event_name,
+  new_account.new_account_cnt as value
+from new_account
