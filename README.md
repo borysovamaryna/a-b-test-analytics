@@ -58,7 +58,7 @@ Total number of sessions
 Number of newly registered users
 
 
-## 📦 Final dataset
+##  Final dataset
 
 The final query produces a unified table with the following metrics:
 
@@ -78,7 +78,7 @@ Data format:
 - value  
 
 
-## 🛠 Technologies
+##  Technologies
 
 - SQL (BigQuery / standard SQL)
 
