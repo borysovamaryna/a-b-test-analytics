@@ -1,91 +1,105 @@
-# a-b-test-analytics
 
-## Опис
-Цей проєкт складається з 3 основних частин:
-1. Містить SQL-запит для аналізу поведінки користувачів  рамках АВ тестувань.  При цьому аналіз базується на сесіях користувачів та включає взаємодію з продуктом, конверсії та події в розрізі країн, континентів, девайсів та каналів.
-2. Подальний аналіз тесту в Python
-3. Далі отримані дані були використані для створення dashboard в Tableau 
+#  A/B Test Analytics
 
-# Частина 1
+##  Description
 
-##  Що реалізовано
+This project consists of 3 main parts:
 
-У запиті:
-
-- об'єднано дані сесій, подій та замовлень
-- враховано A/B тест (test, test_group)
-- розраховано ключові метрики:
-  - кількість сесій
-  - кількість сесій із замовленнями
-  - кількість подій
-  - кількість нових акаунтів
-
-## Структура запиту
-
-**1. general_info**
-
-Базова інформація по сесіях:
-
-- дата
-- країна
-- девайс
-- канал
-- A/B тест
-
-  
-**2. session_with_orders**
-
-Кількість сесій, які завершились замовленням
-
-**3. events**
-
-Агрегація подій користувачів (event_name)
-
-**4. sessions**
-
-Загальна кількість сесій
-
-**5. new_account**
-
-Кількість нових зареєстрованих користувачів
+1. A SQL query for analyzing user behavior within A/B testing experiments. The analysis is based on user sessions and includes product interactions, conversions, and events across countries, continents, devices, and traffic channels.  
+2. Further analysis of the experiment in Python.  
+3. Visualization of the results in a Tableau dashboard.
 
 
-**Фінальний запит**
+#  Part 1 — SQL Data Preparation
 
-Фінальний запит формує уніфіковану таблицю з такими метриками:
+##  What was implemented
 
-- session
-- session with orders
-- events
-- new account
+The SQL query includes:
 
-Дані представлені у форматі:
+- joining session, event, and order data  
+- inclusion of A/B test identifiers (`test`, `test_group`)  
+- calculation of key metrics:
+  - number of sessions  
+  - number of sessions with orders  
+  - number of events  
+  - number of new accounts  
 
-- дата
-- країна
-- девайс
-- канал
-- A/B тест
-- назва метрики (event_name)
-- значення (value)
 
-## Технології
-- SQL (BigQuery / стандарт SQL)
+##  Query structure
 
-# Частина 2
+### `general_info`
 
-## Розрахунок метрик
+Basic session-level information:
 
-Дані були агреговані з використанням pivot-таблиці, де для кожного тесту та групи (A/B) обчислено:
+- date  
+- country  
+- device  
+- traffic channel  
+- A/B test  
 
-- кількість сесій (session)
-- кількість подій:
-  - add_payment_info
-  - add_shipping_info
-  - begin_checkout
-  - new_accounts
 
-На основі цих даних розраховано conversion rate для кожної метрики:
+### `session_with_orders`
+
+Number of sessions that resulted in an order
+
+
+### `events`
+
+Aggregation of user events (`event_name`)
+
+
+### `sessions`
+
+Total number of sessions
+
+
+### `new_account`
+
+Number of newly registered users
+
+
+## 📦 Final dataset
+
+The final query produces a unified table with the following metrics:
+
+- session  
+- session with orders  
+- events  
+- new account  
+
+Data format:
+
+- date  
+- country  
+- device  
+- channel  
+- A/B test  
+- metric name (`event_name`)  
+- value  
+
+
+## 🛠 Technologies
+
+- SQL (BigQuery / standard SQL)
+
+
+#  Part 2 — Metric Calculation in Python
+
+##  Metric aggregation
+
+Data was aggregated using pivot tables. For each test and group (A/B), the following were calculated:
+
+- number of sessions (`session`)  
+- event counts:
+  - add_payment_info  
+  - add_shipping_info  
+  - begin_checkout  
+  - new_accounts  
+
+
+##  Conversion rates
+
+Conversion rates were calculated for each metric:
 
 - add_payment_info / session  
 - add_shipping_info / session  
@@ -93,58 +107,66 @@
 - new_accounts / session  
 
 
-## Порівняння груп A/B
+##  A/B group comparison
 
-Для кожного тесту та кожної метрики було розраховано:
+For each test and metric:
 
-- conversion rate для групи A
-- conversion rate для групи B
-- uplift (%) — відносна зміна метрики між групами
-
-## Статистична перевірка
-
-Для оцінки статистичної значущості використано Z-test для пропорцій, що дозволяє перевірити гіпотезу про відсутність різниці між групами.
-
-Було обчислено:
-
-- Z-score — міра відхилення між групами
-- p-value — ймовірність отримати таку різницю випадково
-- significant_95 — булевий показник (p-value < 0.05)
-
-## Технології
-- Python (Jupyter Notebook / Google Colaboratory)
-
-# Частина 3
-
-## Візуалізація розрахунків
-
-Отримано 2 окремих дашборди перший на основі лише SQL-запиту, другий на основі аналізу в Python
-
-На першому наглядно можемо перевірити:
-- результати в розрізі тестів
-- визначати чи є різниця між групами загалом
-- чи є різниця чи якість викиди в розрізі країн, континентів, девайсів та каналів звязку
-- можемо взяти цифри для потрібних нам метрик і проаналізувати доцільність впроваждення гіпотези за допомогою онлайн ресурс
-
-За допомогою другого дашборду ми можемо:
-- наочно порівнювати результати між групами A і B
-- аналізувати uplift по кожній метриці
-- швидко визначати статистично значущі зміни
-- досліджувати результати в розрізі тестів
+- conversion rate for group A  
+- conversion rate for group B  
+- uplift (%) — relative change between groups  
 
 
-Інтерактивний дашборд доступний за посиланням:
+##  Statistical testing
 
-[https://public.tableau.com/your_dashboard_link](https://public.tableau.com/app/profile/maryna.borysova/viz/ABtest_17756611762510/ABtest)
+A Z-test for proportions was used to evaluate statistical significance between groups.
+
+The following were calculated:
+
+- Z-score — deviation between groups  
+- p-value — probability of observing the difference by chance  
+- significant_95 — boolean indicator (p-value < 0.05)  
 
 
-## Результат
+##  Technologies
 
-У підсумку було побудовано end-to-end процес аналізу A/B тестів:
+- Python (Jupyter Notebook / Google Colaboratory)  
 
-1. SQL — підготовка та агрегація даних  
-2. Python — розрахунок метрик та статистичної значущості  
-3. Tableau — візуалізація та інтерпретація результатів  
 
-## Автор
-Марина Борисова
+# Part 3 — Data Visualization
+
+##  Dashboards
+
+Two separate dashboards were created:
+- one based on SQL output  
+- one based on Python analysis  
+
+
+### SQL-based dashboard allows:
+
+- analysis of results across tests  
+- evaluation of differences between groups  
+- identification of outliers across countries, continents, devices, and channels  
+- extraction of metric values for hypothesis validation  
+
+
+### Python-based dashboard allows:
+
+- comparison of A and B groups  
+- uplift analysis per metric  
+- identification of statistically significant changes  
+- breakdown of results by test  
+
+
+##  Interactive dashboard
+
+```text
+https://public.tableau.com/app/profile/maryna.borysova/viz/ABtest_17756611762510/ABtest
+```
+
+## Final Result
+
+An end-to-end A/B testing analytics pipeline was built:
+
+1. SQL — data extraction and aggregation
+2. Python — metric calculation and statistical testing
+3. Tableau — visualization and interpretation of results
